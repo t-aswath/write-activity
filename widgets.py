@@ -21,7 +21,7 @@ import logging
 import gi
 try:
     gi.require_version('Abi', '2.9')
-except:
+except BaseException:
     gi.require_version('Abi', '3.0')
 from gi.repository import Abi
 from gi.repository import GLib
@@ -212,12 +212,12 @@ class DocumentView(Abi.Widget):
         self.connect('size-allocate', self.__size_allocate_cb)
         try:
             self.connect('request-clear-area', self.__request_clear_area_cb)
-        except:
+        except BaseException:
             logging.debug('EXCEPTION: request-clear-area signal not available')
 
         try:
             self.connect('unset-clear-area', self.__unset_clear_area_cb)
-        except:
+        except BaseException:
             logging.debug('EXCEPTION: unset-clear-area signal not available')
 
         self.osk_changed = False

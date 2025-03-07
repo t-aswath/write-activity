@@ -55,7 +55,7 @@ from speechtoolbar import SpeechToolbar
 from sugar3.graphics.objectchooser import ObjectChooser
 try:
     from sugar3.graphics.objectchooser import FILTER_TYPE_GENERIC_MIME
-except:
+except BaseException:
     FILTER_TYPE_GENERIC_MIME = 'generic_mime'
 
 logger = logging.getLogger('write-activity')
@@ -464,7 +464,7 @@ class AbiWordActivity(activity.Activity):
             chooser = ObjectChooser(self, what_filter='Image',
                                     filter_type=FILTER_TYPE_GENERIC_MIME,
                                     show_preview=True)
-        except:
+        except BaseException:
             # for compatibility with older versions
             chooser = ObjectChooser(self, what_filter='Image')
 
