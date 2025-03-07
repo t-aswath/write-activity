@@ -44,7 +44,7 @@ class FontLabel(Gtk.Label):
 
     def set_font(self, font):
         if self._font != font:
-            self.set_markup('<span font="%s">%s</span>' % (font, font))
+            self.set_markup(f'<span font="{font}">{font}</span>')
 
 
 class FontComboBox(Gtk.ToolItem):
@@ -75,7 +75,7 @@ class FontComboBox(Gtk.ToolItem):
         else:
             subcell_size = 11
         radius = 2 * subcell_size
-        theme = b"GtkButton {border-radius: %dpx;}" % radius
+        theme = f'GtkButton {{border-radius: {radius}px;}}'
         css_provider = Gtk.CssProvider()
         css_provider.load_from_data(theme)
         style_context = bt.get_style_context()
@@ -160,7 +160,7 @@ class FontComboBox(Gtk.ToolItem):
         self.emit('changed')
 
     def _add_menu(self, font_name, activate_cb):
-        label = '<span font="%s">%s</span>' % (font_name, font_name)
+        label = f'<span font="{font_name}">{font_name}</span>'
         menu_item = PaletteMenuItem()
         menu_item.set_label(label)
         menu_item.connect('activate', activate_cb, font_name)
@@ -248,8 +248,8 @@ class FontSize(Gtk.ToolItem):
         hbox.pack_start(self._size_up, False, False, 5)
 
         radius = 2 * subcell_size
-        theme_up = b"GtkButton {border-radius:0px %dpx %dpx 0px;}" % (radius,
-                                                                     radius)
+        theme_up = f'GtkButton {{border-radius:0px {radius}px\
+            {radius}px 0px;}}'
         css_provider_up = Gtk.CssProvider()
         css_provider_up.load_from_data(theme_up)
 
@@ -257,8 +257,8 @@ class FontSize(Gtk.ToolItem):
         style_context.add_provider(css_provider_up,
                                    Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        theme_down = b"GtkButton {border-radius: %dpx 0px 0px %dpx;}" % (radius,
-                                                                        radius)
+        theme_down = f'GtkButton {{border-radius: {radius}px 0px 0px\
+            {radius}px;}}'
         css_provider_down = Gtk.CssProvider()
         css_provider_down.load_from_data(theme_down)
         style_context = self._size_down.get_style_context()

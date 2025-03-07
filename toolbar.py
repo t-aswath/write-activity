@@ -153,7 +153,7 @@ class EditToolbar(Gtk.Toolbar):
                 os.makedirs(temp_path)
             fd, file_path = tempfile.mkstemp(dir=temp_path, suffix='.png')
             os.close(fd)
-            logging.debug('tempfile is %s' % file_path)
+            logging.debug(f'tempfile is {file_path}')
             success, data = pixbuf_sel.save_to_bufferv('png', [], [])
             if success:
                 px_file = open(file_path, 'wb')
@@ -182,8 +182,8 @@ class EditToolbar(Gtk.Toolbar):
         self._abiword_canvas.find_next(False)
 
     def _search_entry_changed_cb(self, entry):
-        logger.debug('_search_entry_changed_cb search for \'%s\'',
-                     self._search_entry.props.text)
+        logger.debug(f'_search_entry_changed_cb search for\
+            \'{self._search_entry.props.text}\'')
 
         if not self._search_entry.props.text:
             self._search_entry.activate()
@@ -567,7 +567,7 @@ class TextToolbar(Gtk.Toolbar):
         self.show_all()
 
     def _font_changed_cb(self, combobox, abi):
-        logger.debug('Setting font: %s', combobox.get_font_name())
+        logger.debug(f'Setting font: {combobox.get_font_name()}')
         try:
             abi.handler_block(self._abi_handler)
             abi.set_font_name(combobox.get_font_name())
@@ -575,7 +575,7 @@ class TextToolbar(Gtk.Toolbar):
             abi.handler_unblock(self._abi_handler)
 
     def _font_family_cb(self, abi, font_family):
-        logging.debug('Abiword font changed to %s', font_family)
+        logging.debug(f'Abiword font changed to {font_family}')
         self.font_name_combo.set_font_name(font_family)
 
     def _font_size_changed_cb(self, widget, abi):
@@ -586,7 +586,7 @@ class TextToolbar(Gtk.Toolbar):
             abi.handler_unblock(self._abi_handler)
 
     def _font_size_cb(self, abi, size):
-        logging.debug('Abiword font size changed to %s', size)
+        logging.debug(f'Abiword font size changed to {size}')
         self.handler_block(self._changed_id)
         self.font_size.set_font_size(int(size))
         self.handler_unblock(self._changed_id)

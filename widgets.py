@@ -52,7 +52,7 @@ class AbiButton(RadioToolButton):
 
         abi.handler_block(self._abi_handler)
         try:
-            logging.debug('Do abi %s' % do_abi_cb)
+            logging.debug(f'Do abi {do_abi_cb}')
             do_abi_cb()
         finally:
             abi.handler_unblock(self._abi_handler)
@@ -64,7 +64,7 @@ class AbiButton(RadioToolButton):
 
         self.handler_block(self._toggled_handler)
         try:
-            logging.debug('On abi %s prop=%r' % (abi_signal, prop))
+            logging.debug(f'On abi {abi_signal} prop={prop}')
             self.set_active(True)
         finally:
             self.handler_unblock(self._toggled_handler)
@@ -96,7 +96,7 @@ class AbiMenuItem(PaletteMenuItem):
 
         abi.handler_block(self._abi_handler)
         try:
-            logging.debug('Do abi %s' % do_abi_cb)
+            logging.debug(f'Do abi {do_abi_cb}')
             do_abi_cb()
             if self._button_icon_name is not None:
                 self._button.set_icon_name(self._button_icon_name)
@@ -110,7 +110,7 @@ class AbiMenuItem(PaletteMenuItem):
                 (on_abi_cb is not None and not on_abi_cb(abi, prop)):
             return
 
-        logging.debug('On abi %s prop=%r' % (abi_signal, prop))
+        logging.debug(f'On abi {abi_signal} prop={prop}')
         if self._button_icon_name is not None:
             self._button.set_icon_name(self._button_icon_name)
         else:
@@ -158,7 +158,7 @@ class ExportButtonFactory():
             button.show()
 
     def __clicked_cb(self, menu_item, activity, abi, format):
-        logger.debug('exporting file: %r' % format)
+        logger.debug(f'exporting file: {format}')
 
         exp_props = format['exp_props']
 
@@ -194,7 +194,7 @@ class ExportButtonFactory():
 
         # write out the document contents in the requested format
         fileObject.file_path = os.path.join(activity.get_activity_root(),
-                                            'instance', '%i' % time.time())
+                                            'instance', str(time.time()))
         abi.save('file://' + fileObject.file_path,
                  format['mime_type'], exp_props)
 
@@ -271,5 +271,5 @@ class DocumentView(Abi.Widget):
 
     def get_version(self):
         version = Abi._version
-        logging.debug('Abiword version %s', version)
+        logging.debug(f'Abiword version {version}')
         return version

@@ -225,8 +225,8 @@ class AbiWordActivity(activity.Activity):
         # set default font
         if self._new_instance:
             self.abiword_canvas.select_all()
-            logging.debug('Setting default font to %s %d in new documents',
-                          self._default_font_face, self._default_font_size)
+            logging.debug(f'Setting default font to {self._default_font_face} \
+                {self._default_font_size} in new documents')
             self.abiword_canvas.set_font_name(self._default_font_face)
             self.abiword_canvas.set_font_size(str(self._default_font_size))
             self.abiword_canvas.moveto_bod()
@@ -269,7 +269,7 @@ class AbiWordActivity(activity.Activity):
         channel = self.tubes_chan[TelepathyGLib.IFACE_CHANNEL_TYPE_TUBES]
         logger.debug('This is my activity: offering a tube...')
         id = channel.OfferDBusTube('com.abisource.abiword.abicollab', {})
-        logger.debug('Tube address: %s', channel.GetDBusTubeAddress(id))
+        logger.debug(f'Tube address: {channel.GetDBusTubeAddress(id)}')
 
     def _sharing_setup(self):
         logger.debug("_sharing_setup()")
@@ -291,7 +291,7 @@ class AbiWordActivity(activity.Activity):
             self._new_tube_cb(*tube_info)
 
     def _list_tubes_error_cb(self, e):
-        logger.error('ListTubes() failed: %s', e)
+        logger.error(f'LisTubes() failed: {e}')
 
     def _joined_cb(self, activity):
         logger.debug("_joined_cb()")
@@ -319,9 +319,8 @@ class AbiWordActivity(activity.Activity):
         self._connecting_box.hide()
 
     def _new_tube_cb(self, id, initiator, type, service, params, state):
-        logger.debug('New tube: ID=%d initiator=%d type=%d service=%s '
-                     'params=%r state=%d', id, initiator, type, service,
-                     params, state)
+        logger.debug(f'New tube: ID={id} initiator={initiator} type={type} \
+            service={service} params={params} state={state}')
 
         if self.tube_id is not None:
             # We are already using a tube
@@ -341,7 +340,7 @@ class AbiWordActivity(activity.Activity):
         dbus_names = channel.GetDBusNames(id)
         for handle, name in dbus_names:
             if handle == initiator:
-                logger.debug('found initiator D-Bus name: %s', name)
+                logger.debug(f'found initiator D-Bus name: {name}')
                 initiator_dbus_name = name
                 break
 
@@ -353,19 +352,19 @@ class AbiWordActivity(activity.Activity):
         # pass this tube to abicollab
         address = channel.GetDBusTubeAddress(id)
         if self.joined:
-            logger.debug('Passing tube address to abicollab (join): %s',
-                         address)
+            logger.debug(f'Passing tube address to abicollab (join): \
+                    {address}')
             self.abiword_canvas.invoke_ex(cmd_prefix + 'joinTube',
                                           address, 0, 0)
             # The intiator of the session has to be the first passed
             # to the Abicollab backend.
-            logger.debug('Adding the initiator to the session: %s',
-                         initiator_dbus_name)
+            logger.debug(f'Adding the initiator to the session:\
+                {initiator_dbus_name}')
             self.abiword_canvas.invoke_ex(cmd_prefix + 'buddyJoined',
                                           initiator_dbus_name, 0, 0)
         else:
-            logger.debug('Passing tube address to abicollab (offer): %s',
-                         address)
+            logger.debug(f'Passing tube address to abicollab (offer):\
+                {address}')
             self.abiword_canvas.invoke_ex(cmd_prefix + 'offerTube', address,
                                           0, 0)
         self.tube_id = id
@@ -385,8 +384,8 @@ class AbiWordActivity(activity.Activity):
 #        if tube_id == self.tube_id:
         cmd_prefix = 'com.abisource.abiword.abicollab.olpc'
         for handle, bus_name in added:
-            logger.debug('added handle: %s, with dbus_name: %s',
-                         handle, bus_name)
+            logger.debug(f'added handle: {handle}, with dbus_name:\
+                    {bus_name}')
             self.abiword_canvas.invoke_ex(cmd_prefix + '.buddyJoined',
                                           bus_name, 0, 0)
             self.participants[handle] = bus_name
@@ -402,20 +401,20 @@ class AbiWordActivity(activity.Activity):
                 continue
 
             cmd_prefix = 'com.abisource.abiword.abicollab.olpc'
-            logger.debug('removed handle: %d, with dbus name: %s', handle,
-                         bus_name)
+            logger.debug(f'removed handle: {handle}, with dbus name:\
+                    {bus_name}')
             self.abiword_canvas.invoke_ex(cmd_prefix + '.buddyLeft',
                                           bus_name, 0, 0)
 
     def _buddy_joined_cb(self, activity, buddy):
-        logger.debug('buddy joined with object path: %s', buddy.object_path())
+        logger.debug(f'buddy joined with object path: {buddy.object_path()}')
 
     def _buddy_left_cb(self, activity, buddy):
-        logger.debug('buddy left with object path: %s', buddy.object_path())
+        logger.debug(f'buddy left with object path: {buddy.object_path()}')
 
     def read_file(self, file_path):
-        logging.debug('AbiWordActivity.read_file: %s, mimetype: %s',
-                      file_path, self.metadata['mime_type'])
+        logging.debug(f'AbiWordActivity.read_file: {file_path} mimetype: \
+            {self.metadata['mime_type']}')
         if self._is_plain_text(self.metadata['mime_type']):
             self.abiword_canvas.load_file('file://' + file_path, 'text/plain')
         else:
@@ -426,8 +425,8 @@ class AbiWordActivity(activity.Activity):
         self._new_instance = False
 
     def write_file(self, file_path):
-        logging.debug('AbiWordActivity.write_file: %s, mimetype: %s',
-                      file_path, self.metadata['mime_type'])
+        logging.debug(f'AbiWordActivity.write_file: {file_path} mimetype: \
+            {self.metadata['mime_type']}')
         # if we were editing a text file save as plain text
         if self._is_plain_text(self.metadata['mime_type']):
             logger.debug('Writing file as type source (text/plain)')
@@ -471,8 +470,8 @@ class AbiWordActivity(activity.Activity):
         try:
             result = chooser.run()
             if result == Gtk.ResponseType.ACCEPT:
-                logging.debug('ObjectChooser: %r',
-                              chooser.get_selected_object())
+                logging.debug(f'ObjectChooser: \
+                {chooser.get_selected_object()}')
                 jobject = chooser.get_selected_object()
                 if jobject and jobject.file_path:
                     self.abiword_canvas.insert_image(jobject.file_path,
