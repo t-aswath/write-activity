@@ -19,6 +19,8 @@
 from gettext import gettext as _
 import logging
 import os
+import requests
+import threading
 
 # Abiword needs this to happen as soon as possible
 from gi.repository import GObject
@@ -30,6 +32,7 @@ gi.require_version('TelepathyGLib', '0.12')
 
 from gi.repository import Gtk
 from gi.repository import TelepathyGLib
+from gi.repository import Gdk
 
 from sugar3.activity import activity
 from sugar3.activity.widgets import StopButton
@@ -72,6 +75,21 @@ class ConnectingBox(Gtk.VBox):
         waiting_icon.set_xo_color(XoColor('white'))
         self.add(waiting_icon)
         self.add(Gtk.Label(_('Connecting...')))
+        self.show_all()
+        self.hide()
+
+class GrammarIndicator(Gtk.VBox):
+
+    def __init__(self):
+        Gtk.VBox.__init__(self)
+        self.props.halign = Gtk.Align.END
+        self.props.valign = Gtk.Align.END
+        self.props.margin = 50
+        waiting_icon = Icon(icon_name='kfind',
+                            pixel_size=style.STANDARD_ICON_SIZE)
+        waiting_icon.set_xo_color(XoColor('black'))
+        self.add(waiting_icon)
+        self.add(Gtk.Label(_('Finding Errors...')))
         self.show_all()
         self.hide()
 
@@ -142,6 +160,25 @@ class AbiWordActivity(activity.Activity):
         self._image_id = image.connect('clicked', self.__image_cb)
         toolbar_box.toolbar.insert(image, -1)
 
+        grammer = ToolButton("grammar")
+        grammer.set_tooltip(_('Grammar'))
+        self._grammer_id = grammer.connect('clicked', self.__grammar_check)
+        toolbar_box.toolbar.insert(grammer, -1)
+        
+        grammer_palette = grammer.get_palette()
+        grammer_box = PaletteMenuBox()
+        grammer_palette.set_content(grammer_box)
+        grammer_box.show()
+        menu_item = PaletteMenuItem(_('co-pilot'))
+        menu_item.connect('activate', self.__grammar_check)
+        grammer_box.append_item(menu_item)
+        menu_item = PaletteMenuItem(_('self-check'))
+        menu_item.connect('activate', self.__grammar_check)
+        grammer_box.append_item(menu_item)
+        menu_item.show()
+        menu_item.show()
+
+
         palette = image.get_palette()
         box = PaletteMenuBox()
         palette.set_content(box)
@@ -171,6 +208,9 @@ class AbiWordActivity(activity.Activity):
 
         self._connecting_box = ConnectingBox()
         overlay.add_overlay(self._connecting_box)
+
+        self._grammer_box = GrammarIndicator()
+        overlay.add_overlay(self._grammer_box)
 
         self.set_canvas(overlay)
 
@@ -480,3 +520,38 @@ class AbiWordActivity(activity.Activity):
         finally:
             chooser.destroy()
             del chooser
+
+    def __grammar_request(self, data):
+        try:
+            response = requests.post(
+                "http://localhost:8000",
+                json={"text": data, "level": "hard"},
+            )
+            if response.status_code == 200:
+                data = response.json()
+                print("[LOG]:", data)
+                text = ""
+                for item in data["suggestions"]:
+                    text+=item["correct"]+"\n"
+                clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+                Gtk.Clipboard.set_text(clipboard, text, -1)
+                self.abiword_canvas.paste()
+            else:
+                print("[LOG]: ERROR Server Error")
+        except Exception as e:
+            print("[LOG]: ERROR", e)
+        finally:
+            self._grammer_box.hide()
+
+    def __grammar_check(self, button):
+        self._grammer_box.show()
+        try:
+            abi = self.abiword_canvas
+            text = abi.get_content("text/plain", None)
+
+            thread = threading.Thread(target=self.__grammar_request, args=(text[0],))
+            thread.daemon = True
+            thread.start()
+        except Exception as e:
+            print("[LOG]: ERROR", e)
+
